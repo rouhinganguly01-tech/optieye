@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About OptiEye | The Future of Officiating</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;600;700&family=Rajdhani:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #02040a; 
+            --card-bg: #070c1a;
+            --text-main: #e2e8f0;
+            --theme-saffron: #ff9933;
+            --theme-white: #ffffff;
+            --theme-green: #138808;
+            --theme-cyan: #00e5ff; 
+            
+            --saffron-glow: rgba(255, 153, 51, 0.5);
+            --green-glow: rgba(19, 136, 8, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Jura', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .data-grid-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2; pointer-events: none;
+            perspective: 1000px;
+        }
+
+        .data-grid-bg::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 20%, var(--bg-base) 80%);
+        }
+
+        /* --- NAVBAR (SINGLE LINE) --- */
+        nav {
+            position: fixed; width: 100%; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 4, 10, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; transition: all 0.4s ease;
+            white-space: nowrap; 
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+        .logo-img { height: 45px; width: auto; filter: drop-shadow(0 0 10px rgba(255,153,51,0.3)); }
+        .logo-text { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none;}
+        .logo-text span { color: var(--theme-saffron); }
+
+        .nav-links { display: flex; align-items: center; gap: 1.8rem; flex-wrap: nowrap; }
+        .nav-links a { 
+            color: #94a3b8; text-decoration: none; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; font-size: 0.85rem; 
+        }
+        .nav-links a.active { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .nav-links a:hover { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        .btn-glow {
+            background: transparent; color: var(--theme-white); border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1.5rem; font-family: 'Jura', sans-serif; font-weight: 700; cursor: pointer;
+            transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; letter-spacing: 1px;
+            background: linear-gradient(90deg, rgba(255,153,51,0.1), rgba(19,136,8,0.1));
+            flex-shrink: 0; 
+        }
+        .btn-glow:hover { border-color: var(--theme-saffron); box-shadow: 0 0 20px var(--saffron-glow); background: rgba(255,153,51,0.1); }
+
+        .hero {
+            height: 60vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; padding: 0 2rem; position: relative; z-index: 10;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: radial-gradient(circle at bottom, rgba(19, 136, 8, 0.1) 0%, transparent 60%);
+        }
+
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif; font-size: 5rem; font-weight: 800;
+            line-height: 1.1; margin-bottom: 1rem; letter-spacing: 2px; text-transform: uppercase;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, var(--theme-saffron) 50%, var(--theme-green) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem; color: #94a3b8; max-width: 700px;
+            font-weight: 600; text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+
+        .section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .split-content { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-bottom: 6rem; }
+        .text-block h2 {
+            font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; color: #fff;
+            margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+        .text-block h2 span { color: var(--theme-saffron); }
+        .text-block p { font-size: 1.15rem; color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.8; }
+        
+        /* Holographic VARaaS Graphic */
+        .tech-graphic {
+            position: relative; width: 100%; height: 400px;
+            background: rgba(7, 12, 26, 0.6); border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; backdrop-filter: blur(10px);
+            perspective: 800px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+        }
+        .holo-scanline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 15%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.2), transparent);
+            animation: holoScan 4s linear infinite; z-index: 5; pointer-events: none;
+        }
+        @keyframes holoScan { 0% { top: -20%; } 100% { top: 120%; } }
+
+        .holo-ring-container {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotateX(65deg); transform-style: preserve-3d; z-index: 1;
+        }
+        .holo-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid transparent; }
+        .ring-1 { width: 250px; height: 250px; border-top: 3px solid var(--theme-cyan); border-bottom: 3px solid var(--theme-cyan); animation: spinRing 6s linear infinite; box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 20px rgba(0, 229, 255, 0.3); }
+        .ring-2 { width: 320px; height: 320px; border-left: 2px solid var(--theme-saffron); border-right: 2px solid var(--theme-saffron); animation: spinRing 8s linear infinite reverse; opacity: 0.6; }
+        .ring-3 { width: 180px; height: 180px; border: 1px dashed rgba(255, 255, 255, 0.4); animation: spinRing 12s linear infinite; }
+        @keyframes spinRing { 0% { transform: translate(-50%, -50%) rotateZ(0deg); } 100% { transform: translate(-50%, -50%) rotateZ(360deg); } }
+
+        .var-text-holo {
+            font-size: 4.5rem; color: transparent; font-family: 'Rajdhani', sans-serif; font-weight: 800;
+            -webkit-text-stroke: 2px var(--theme-cyan); text-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
+            position: relative; animation: holoFlicker 3s infinite alternate;
+        }
+        .var-text-holo::before, .var-text-holo::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8; }
+        .var-text-holo::before { color: var(--theme-cyan); z-index: -1; transform: translate(-3px, 2px); -webkit-text-stroke: 0px; animation: holoGlitch 2s infinite linear; }
+        .var-text-holo::after { color: var(--theme-saffron); z-index: -2; transform: translate(3px, -2px); -webkit-text-stroke: 0px; animation: holoGlitch 2.5s infinite linear reverse; }
+        .var-subtext-holo {
+            font-size: 1.4rem; color: transparent; font-family: 'Rajdhani', sans-serif; font-weight: 700;
+            -webkit-text-stroke: 1px var(--theme-saffron); text-shadow: 0 0 15px rgba(255, 153, 51, 0.8);
+            position: relative; animation: holoFlicker 3s infinite alternate; letter-spacing: 3px; margin-top: -10px;
+        }
+        .var-subtext-holo::before, .var-subtext-holo::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8; }
+        .var-subtext-holo::before { color: var(--theme-saffron); z-index: -1; transform: translate(-2px, 1px); -webkit-text-stroke: 0px; animation: holoGlitch 2.2s infinite linear; }
+        .var-subtext-holo::after { color: var(--theme-green); z-index: -2; transform: translate(2px, -1px); -webkit-text-stroke: 0px; animation: holoGlitch 2.7s infinite linear reverse; }
+        @keyframes holoFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.9; text-shadow: 0 0 10px rgba(0,229,255,0.5); } 52% { opacity: 0.5; } 54% { opacity: 1; } }
+        @keyframes holoGlitch { 0%, 100% { clip-path: inset(0 0 100% 0); } 20% { clip-path: inset(20% 0 60% 0); } 40% { clip-path: inset(80% 0 5% 0); } 60% { clip-path: inset(40% 0 40% 0); } 80% { clip-path: inset(10% 0 80% 0); } }
+
+        .tech-graphic::after {
+            content: 'OPENCV // AI ENGINE ACTIVE'; position: absolute; bottom: 20px; left: 20px;
+            font-family: 'Rajdhani', sans-serif; color: var(--theme-cyan); font-weight: 700; letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--theme-cyan); z-index: 10;
+        }
+
+        /* High-Tech AR Logo Display */
+        .holo-logo-container {
+            position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; height: 100%; perspective: 1000px;
+        }
+        .holo-logo-wrapper { position: relative; animation: floatLogo 4s ease-in-out infinite; z-index: 5; }
+        .holo-logo { height: 220px; width: auto; opacity: 0.95; filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.4)); position: relative; z-index: 2; }
+        .holo-phantom {
+            position: absolute; top: 0; left: 0; height: 220px; width: auto;
+            filter: drop-shadow(4px 0 0 rgba(255, 153, 51, 0.8)) drop-shadow(-4px 0 0 rgba(0, 229, 255, 0.8));
+            opacity: 0; z-index: 1; pointer-events: none; animation: glitchPhantom 5s infinite;
+        }
+        .ar-base {
+            position: absolute; bottom: -30px; left: 50%; margin-left: -125px; 
+            width: 250px; height: 250px; border: 2px dashed rgba(0, 229, 255, 0.5); border-radius: 50%;
+            transform: rotateX(75deg); box-shadow: 0 0 30px rgba(0, 229, 255, 0.2), inset 0 0 30px rgba(0, 229, 255, 0.2);
+            animation: spinBase 15s linear infinite; z-index: 0;
+        }
+        .ar-base::before {
+            content: ''; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px dotted rgba(19, 136, 8, 0.6); border-radius: 50%;
+            box-shadow: 0 0 20px rgba(19, 136, 8, 0.2); animation: spinBase 8s linear infinite reverse;
+        }
+        .ar-base::after {
+            content: ''; position: absolute; top: 50px; left: 50px; right: 50px; bottom: 50px;
+            border: 1px solid rgba(255, 153, 51, 0.4); border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 153, 51, 0.2); animation: spinBase 5s linear infinite;
+        }
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes glitchPhantom { 0%, 90% { transform: translate(0, 0); opacity: 0; } 92% { transform: translate(-3px, 2px); opacity: 0.8; } 94% { transform: translate(3px, -2px); opacity: 0.8; } 96% { transform: translate(0, 0); opacity: 0; } 98% { transform: translate(2px, 0); opacity: 0.6; } 100% { transform: translate(0, 0); opacity: 0; } }
+        @keyframes spinBase { 0% { transform: rotateX(75deg) rotateZ(0deg); } 100% { transform: rotateX(75deg) rotateZ(360deg); } }
+
+        /* Tech Stack Grid */
+        .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; }
+        .tech-card {
+            background: rgba(7, 12, 26, 0.8); border: 1px solid rgba(255,255,255,0.05);
+            padding: 2rem; border-radius: 12px; transition: all 0.4s ease; position: relative; overflow: hidden;
+        }
+        .tech-card:hover { border-color: var(--theme-green); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(19, 136, 8, 0.15); }
+        .tech-card h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; color: #fff; margin-bottom: 1rem; }
+        .tech-card p { color: #94a3b8; font-size: 1rem; }
+        .tech-card::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 30px; height: 30px;
+            background: linear-gradient(135deg, transparent 50%, rgba(255, 153, 51, 0.3) 50%);
+        }
+
+        .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 4rem 0; }
+    </style>
+</head>
+<body>
+
+    <div class="data-grid-bg"></div>
+
+    <!-- Global Navigation -->
+    <nav id="navbar">
+        <a href="index.html" class="logo-container">
+            <img src="optieye-logo.png" alt="OptiEye Shield Logo" class="logo-img">
+            <div class="logo-text">OPTIEYE <span>VAR LITE</span></div>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="how-we-work.html">How We Work</a>
+            <a href="investor.html">Investor Portal</a>
+            <a href="contact.html">Contact</a>
+            <button class="btn-glow" style="margin-left: 2rem;" onclick="location.href='demo.html'">Interactive Demo</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1><span class="gradient-text">The OptiEye Story</span></h1>
+        <p class="hero-subtitle">
+            Born from a deep passion for the game. Engineered to eradicate the officiating divide. We are building the future of football technology from the ground up.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="split-content reveal">
+            <div class="text-block">
+                <h2>Democratizing <br><span>Fair Play.</span></h2>
+                <p>For decades, professional Video Assistant Referee (VAR) technology has been gatekept by massive capital expenditures. The top 1% of global football leagues enjoy absolute accuracy, while emerging, Tier-2, and regional leagues are left exposed to critical officiating errors.</p>
+                <p>OptiEye was founded to shatter this technical monopoly. We believe that match integrity should not be dictated by a federation's budget. By rethinking how video processing, camera synchronization, and remote officiating operate, we have created a broadcast-grade system accessible to the rest of the world.</p>
+            </div>
+            
+            <div class="tech-graphic">
+                <div class="holo-scanline"></div>
+                <div class="holo-ring-container">
+                    <div class="holo-ring ring-1"></div>
+                    <div class="holo-ring ring-2"></div>
+                    <div class="holo-ring ring-3"></div>
+                </div>
+                <div style="text-align: center; z-index: 10; position: relative;">
+                    <div class="var-text-holo" data-text="VARaaS">VARaaS</div>
+                    <div class="var-subtext-holo" data-text="VAR-AS-A-SERVICE">VAR-AS-A-SERVICE</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider reveal"></div>
+
+        <div class="reveal">
+            <div class="text-block" style="text-align: center; max-width: 800px; margin: 0 auto;">
+                <h2>Indigenous <span style="color: var(--theme-green);">Engineering.</span></h2>
+                <p>We didn't just assemble off-the-shelf parts; we built the core engine from scratch. OptiEye VAR Lite is proudly developed in India, utilizing a highly optimized software stack to guarantee ultra-low latency processing even in demanding stadium environments.</p>
+            </div>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h3 style="color: var(--theme-cyan);">OpenCV Vision</h3>
+                    <p>Powered by advanced computer vision algorithms to track, sync, and calibrate offside lines across up to 5 simultaneous broadcast feeds with pinpoint accuracy.</p>
+                </div>
+                <div class="tech-card">
+                    <h3 style="color: var(--theme-saffron);">C++ & Python Core</h3>
+                    <p>A robust backend architecture that ensures less than 0.5s system latency. The software is engineered for relentless stability during 90+ minutes of high-stakes play.</p>
+                </div>
+                <div class="tech-card">
+                    <h3 style="color: var(--theme-green);">Centralized VOR</h3>
+                    <p>By moving the Video Operation Room to a remote, centralized hub, we eliminate the need for heavy on-site server racks and mobile vans at the stadium.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider reveal"></div>
+
+        <div class="split-content reveal" style="direction: rtl;">
+            <div class="text-block" style="direction: ltr;">
+                <h2>A Global Standard, <br><span style="color: var(--theme-cyan);">Made in India.</span></h2>
+                <p>Our vision extends far beyond domestic borders. While OptiEye is deeply rooted in India's growing football ecosystem, our 'Managed VAR Services' model is built to scale internationally.</p>
+                <p>By supplying our own proprietary technology, network infrastructure, and IFAB-trained officiating personnel, federations around the world can implement professional VAR without the paralyzing operational headaches.</p>
+            </div>
+            
+            <div style="direction: ltr; position: relative; width: 100%; height: 420px; background: rgba(7, 12, 26, 0.6); border: 1px solid rgba(19, 136, 8, 0.2); border-radius: 12px; overflow: hidden; backdrop-filter: blur(10px);">
+                 <div class="holo-logo-container">
+                     <div class="ar-base"></div>
+                     <div class="holo-logo-wrapper">
+                         <img src="optieye-logo.png" alt="" class="holo-phantom">
+                         <img src="optieye-logo.png" alt="OptiEye Logo" class="holo-logo">
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auto-Active Script & Animations -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+            const menuItems = document.querySelectorAll('#nav-links a');
+            menuItems.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); 
+
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(2, 4, 10, 0.9)';
+                nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.5)';
+            } else {
+                nav.style.background = 'rgba(2, 4, 10, 0.7)';
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

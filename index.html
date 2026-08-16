@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiEye VAR Lite | Indigenous Next-Gen Officiating</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;600;700&family=Rajdhani:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Premium Made in India Palette */
+            --bg-base: #02040a; 
+            --card-bg: #070c1a;
+            --text-main: #e2e8f0;
+            --theme-saffron: #ff9933;
+            --theme-white: #ffffff;
+            --theme-green: #138808;
+            --theme-cyan: #00e5ff; 
+            
+            /* Soft Glows */
+            --saffron-glow: rgba(255, 153, 51, 0.5);
+            --green-glow: rgba(19, 136, 8, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Jura', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- 3D TACTICAL FOOTBALL HOLOGRAM (BACKGROUND) --- */
+        .var-hologram-wrapper {
+            position: fixed;
+            top: 50%; left: 50%;
+            width: 100vw; height: 100vh;
+            transform: translate(-50%, -50%);
+            perspective: 1200px;
+            z-index: -2;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, rgba(10, 17, 40, 0.8) 0%, var(--bg-base) 70%);
+        }
+
+        .tactical-pitch {
+            width: 700px; height: 1050px;
+            border: 3px solid rgba(255, 153, 51, 0.3);
+            box-shadow: 0 0 50px rgba(255, 153, 51, 0.1), inset 0 0 50px rgba(255, 153, 51, 0.1);
+            transform: rotateX(70deg) rotateZ(35deg);
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotatePitch 60s linear infinite;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        @keyframes rotatePitch {
+            0% { transform: rotateX(70deg) rotateZ(0deg); }
+            100% { transform: rotateX(70deg) rotateZ(360deg); }
+        }
+
+        /* Pitch Markings */
+        .pitch-center-line {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 3px;
+            background: rgba(255, 153, 51, 0.3); box-shadow: 0 0 15px rgba(255, 153, 51, 0.4);
+        }
+        
+        .pitch-center-circle {
+            position: absolute; top: 50%; left: 50%; width: 200px; height: 200px;
+            border: 3px solid rgba(255, 153, 51, 0.3); border-radius: 50%;
+            transform: translate(-50%, -50%); box-shadow: 0 0 15px rgba(255, 153, 51, 0.4), inset 0 0 15px rgba(255, 153, 51, 0.4);
+        }
+
+        .penalty-box-top {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 350px; height: 180px;
+            border: 3px solid rgba(19, 136, 8, 0.4); border-top: none; box-shadow: 0 0 15px rgba(19, 136, 8, 0.4);
+        }
+
+        .penalty-box-bottom {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 350px; height: 180px;
+            border: 3px solid rgba(19, 136, 8, 0.4); border-bottom: none; box-shadow: 0 0 15px rgba(19, 136, 8, 0.4);
+        }
+
+        /* 3D Goal Posts */
+        .goal-post {
+            position: absolute;
+            width: 150px; height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            transform-style: preserve-3d;
+        }
+
+        .goal-post::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .goal-top {
+            top: -60px; left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotateX(-90deg);
+            border-bottom: none;
+        }
+
+        .goal-bottom {
+            bottom: -60px; left: 50%;
+            transform-origin: top center;
+            transform: translateX(-50%) rotateX(90deg);
+            border-top: none;
+        }
+
+        /* Cameras & Radar */
+        .camera-node {
+            position: absolute; width: 16px; height: 16px;
+            background: var(--theme-white); border: 3px solid var(--theme-cyan);
+            box-shadow: 0 0 20px 4px var(--theme-cyan);
+            transform: translate(-50%, -50%) translateZ(10px);
+            z-index: 20; border-radius: 3px;
+        }
+
+        .cam-label {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            color: var(--theme-cyan); font-family: 'Rajdhani', sans-serif;
+            font-weight: 800; font-size: 14px; text-shadow: 0 0 10px var(--theme-cyan);
+            white-space: nowrap;
+        }
+
+        .camera-node::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            border: 2px solid var(--theme-cyan); border-radius: 50%;
+            transform: translate(-50%, -50%); animation: camRadar 3s infinite ease-out;
+        }
+
+        @keyframes camRadar {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 450px; height: 450px; opacity: 0; }
+        }
+
+        .cam-1 { top: 50%; left: -40px; } 
+        .cam-2 { top: 50%; right: -40px; } 
+        .cam-3 { top: 15%; left: -40px; } 
+        .cam-4 { bottom: 15%; left: -40px; } 
+        .cam-5 { top: -40px; left: 50%; } 
+
+        .cam-2::after { animation-delay: 0.5s; }
+        .cam-3::after { animation-delay: 1s; }
+        .cam-4::after { animation-delay: 1.5s; }
+        .cam-5::after { animation-delay: 2s; }
+
+        /* VAR Scanning Laser */
+        .var-scanner-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--theme-cyan); box-shadow: 0 0 20px 4px rgba(0, 229, 255, 0.6);
+            animation: scanPitch 5s ease-in-out infinite alternate;
+            z-index: 5;
+        }
+
+        @keyframes scanPitch {
+            0% { top: 0%; opacity: 0.2;}
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0.2; }
+        }
+
+        /* Floating Overlay */
+        .hologram-live-overlay {
+            position: absolute; top: 50%; right: 20px;
+            transform: translateY(-50%) translateZ(20px) rotateZ(90deg); 
+            display: flex; flex-direction: column; align-items: center;
+            z-index: 10; pointer-events: none;
+        }
+
+        .hologram-logo {
+            height: 55px; width: auto; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+        }
+
+        .hologram-live-title {
+            font-family: 'Rajdhani', sans-serif; font-size: 2.2rem; font-weight: 800;
+            color: rgba(255, 255, 255, 0.85); text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase;
+        }
+
+        .hologram-live-status {
+            display: flex; align-items: center; gap: 8px; font-family: 'Jura', sans-serif; font-size: 1rem; font-weight: 700;
+            color: var(--theme-cyan); text-shadow: 0 0 10px var(--theme-cyan); letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 10px; height: 10px; background: var(--theme-cyan);
+            border-radius: 50%; box-shadow: 0 0 15px var(--theme-cyan);
+            animation: pulseStatus 1s infinite alternate;
+        }
+
+        @keyframes pulseStatus {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        /* --- UNIVERSAL NAVBAR --- */
+        nav {
+            position: fixed; width: 100%; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 4, 10, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; transition: all 0.4s ease;
+            white-space: nowrap; 
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+        .logo-img { height: 45px; width: auto; filter: drop-shadow(0 0 10px rgba(255,153,51,0.3)); }
+        .logo-text { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none;}
+        .logo-text span { color: var(--theme-saffron); }
+
+        .nav-links { display: flex; align-items: center; gap: 1.8rem; flex-wrap: nowrap; }
+        .nav-links a { 
+            color: #94a3b8; text-decoration: none; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; font-size: 0.85rem; 
+        }
+        .nav-links a.active { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .nav-links a:hover { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        .btn-glow {
+            background: transparent; color: var(--theme-white); border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1.5rem; font-family: 'Jura', sans-serif; font-weight: 700; cursor: pointer;
+            transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; letter-spacing: 1px;
+            background: linear-gradient(90deg, rgba(255,153,51,0.1), rgba(19,136,8,0.1));
+            flex-shrink: 0; 
+        }
+        .btn-glow:hover { border-color: var(--theme-saffron); box-shadow: 0 0 20px var(--saffron-glow); background: rgba(255,153,51,0.1); }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; padding: 0 2rem; position: relative; z-index: 10;
+        }
+
+        .indigenous-badge {
+            display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2rem;
+            border: 1px solid rgba(19,136,8,0.3); padding: 8px 24px; border-radius: 50px;
+            color: var(--theme-green); font-weight: 700; background: rgba(19, 136, 8, 0.05);
+            letter-spacing: 2px; font-size: 0.85rem; text-transform: uppercase; backdrop-filter: blur(5px);
+        }
+
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif; font-size: 5.5rem; font-weight: 800;
+            line-height: 1.1; margin-bottom: 1rem; letter-spacing: 2px; text-transform: uppercase;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, var(--theme-saffron) 50%, var(--theme-green) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem; color: #94a3b8; margin-bottom: 3rem; max-width: 800px;
+            font-weight: 600; line-height: 1.6; text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        }
+        .hero-subtitle span { color: var(--theme-white); }
+
+        /* --- PREMIUM SCROLL REVEALS --- */
+        .section { padding: 8rem 2rem; max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2.5rem; margin-top: 3rem; }
+
+        /* --- ROTATING GLOW EDGE CARDS --- */
+        .card-wrapper {
+            position: relative; border-radius: 12px; padding: 1px; overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-wrapper::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient( transparent, var(--theme-saffron), transparent 30%, var(--theme-green) 50%, transparent 80% );
+            animation: spinGlow 6s linear infinite; opacity: 0.3; transition: opacity 0.5s;
+        }
+
+        .card-wrapper:hover { transform: translateY(-10px); }
+        .card-wrapper:hover::before { opacity: 1; animation-duration: 3s; }
+
+        @keyframes spinGlow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .glass-card {
+            background: rgba(7, 12, 26, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-radius: 11px; padding: 3rem 2.5rem; position: relative; z-index: 1;
+            height: 100%; display: flex; flex-direction: column;
+        }
+
+        .glass-card h3 { 
+            font-family: 'Rajdhani', sans-serif; font-size: 2rem; color: #fff; 
+            margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .glass-card p { font-size: 1.1rem; line-height: 1.7; color: #94a3b8; }
+
+        /* DATA COUNTER HIGHLIGHTS */
+        .data-value {
+            font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; font-weight: 800;
+            color: var(--theme-green); text-shadow: 0 0 15px var(--green-glow);
+            margin-bottom: 0.5rem; display: block;
+        }
+
+        /* --- PIPELINE LAYOUT --- */
+        .pipeline-container { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 4rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+
+        .pipeline-step {
+            display: flex; align-items: center; background: rgba(7, 12, 26, 0.6);
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 2rem;
+            transition: all 0.4s ease; backdrop-filter: blur(10px);
+        }
+
+        .pipeline-step:hover {
+            background: rgba(7, 12, 26, 0.9); border-color: rgba(19, 136, 8, 0.3);
+            transform: translateX(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .step-number { 
+            font-family: 'Rajdhani', sans-serif; font-size: 3.5rem; font-weight: 800; 
+            color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+            margin-right: 2.5rem; transition: all 0.4s ease;
+        }
+
+        .pipeline-step:hover .step-number { color: rgba(19, 136, 8, 0.1); -webkit-text-stroke: 1px var(--theme-green); }
+        .step-content h3 { color: #fff; font-size: 1.5rem; margin-bottom: 0.5rem; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px;}
+        .step-content p { color: #94a3b8; font-size: 1.05rem; line-height: 1.6; }
+
+    </style>
+</head>
+<body>
+
+    <div class="data-grid-bg"></div>
+
+    <div class="var-hologram-wrapper">
+        <div class="tactical-pitch" id="tactical-pitch">
+            <div class="pitch-center-line"></div>
+            <div class="pitch-center-circle"></div>
+            <div class="penalty-box-top"></div>
+            <div class="penalty-box-bottom"></div>
+            <div class="var-scanner-line"></div>
+            <div class="goal-post goal-top"></div>
+            <div class="goal-post goal-bottom"></div>
+            <div class="camera-node cam-1"><span class="cam-label">CAM 1</span></div>
+            <div class="camera-node cam-2"><span class="cam-label">CAM 2</span></div>
+            <div class="camera-node cam-3"><span class="cam-label">CAM 3</span></div>
+            <div class="camera-node cam-4"><span class="cam-label">CAM 4</span></div>
+            <div class="camera-node cam-5"><span class="cam-label">CAM 5</span></div>
+            <div class="hologram-live-overlay">
+                <img src="optieye-logo.png" alt="OptiEye Logo" class="hologram-logo">
+                <div class="hologram-live-title">OPTIEYE VAR LITE</div>
+                <div class="hologram-live-status">
+                    <div class="live-dot"></div>
+                    SYSTEM LIVE
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Navigation -->
+    <nav id="navbar">
+        <a href="index.html" class="logo-container">
+            <img src="optieye-logo.png" alt="OptiEye Shield Logo" class="logo-img">
+            <div class="logo-text">OPTIEYE <span>VAR LITE</span></div>
+        </a>
+        
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="how-we-work.html">How We Work</a>
+            <a href="investor.html">Investor Portal</a>
+            <a href="contact.html">Contact</a>
+            
+            <button class="btn-glow" style="margin-left: 2rem;" onclick="location.href='demo.html'">Interactive Demo</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="indigenous-badge">
+            Proudly Developed in India
+        </div>
+        <h1>
+            <span class="gradient-text">Democratizing VAR.</span><br>
+            Beyond Perception.
+        </h1>
+        <p class="hero-subtitle">
+            An indigenous, AI-powered video officiating system built for the global stage. <span>End-to-End Managed VAR Services</span> deploying broadcast-grade tech without the capital expenditure.
+        </p>
+        <div style="display: flex; gap: 20px;">
+            <a href="#architecture" class="btn-glow" style="padding: 1rem 3rem; font-size: 1.1rem; text-decoration: none; border-radius: 50px;">Explore the Architecture</a>
+        </div>
+    </section>
+
+    <section id="architecture" class="section">
+        <div class="reveal text-center" style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-family: 'Rajdhani'; font-size: 3rem; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">END-TO-END <span style="color: var(--theme-saffron);">MANAGED SERVICES</span></h2>
+            <p style="font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 1rem auto; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">We provide the technology, the infrastructure, and the professionals.</p>
+        </div>
+        <div class="grid-cards reveal">
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <h3>⚙️ Own Technology</h3>
+                    <p>Indigenous AI-powered ultra-low latency software built with C++, Qt, and OpenCV. FIFA VAR Lite compliant architecture.</p>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <h3>📡 Own Infrastructure</h3>
+                    <p>We deploy the camera rigs, network solutions, and the centralized remote VOR (Video Operation Room) hub.</p>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <h3>🛡️ Own VAR Team</h3>
+                    <p>The league doesn't buy or operate VAR. We supply expert, IFAB-trained VAR personnel for complete match operation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); background: radial-gradient(circle at center, rgba(19, 136, 8, 0.05) 0%, transparent 70%);">
+        <div class="reveal text-center" style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-family: 'Rajdhani'; font-size: 3rem; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">ENGINEERED FOR <span style="color: var(--theme-green);">PRECISION</span></h2>
+        </div>
+        <div class="grid-cards reveal" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <span class="data-value counter" data-target="0.5" data-prefix="< " data-suffix="s">&lt; 0.0s</span>
+                    <h3>Ultra-Low Latency</h3>
+                    <p>High-accuracy processing ensuring immediate multi-angle replays with virtually zero lag time.</p>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <span class="data-value counter" data-target="5" data-prefix="" data-suffix=" Feeds">0 Feeds</span>
+                    <h3>Camera Sync</h3>
+                    <p>Seamlessly processes multiple broadcast feeds simultaneously, strictly adhering to FIFA VAR Lite parameters.</p>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <span class="data-value counter" data-target="100" data-prefix="" data-suffix="%">0%</span>
+                    <h3>Match Integrity</h3>
+                    <p>Delivering complete transparency and professional officiating to emerging leagues globally.</p>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="glass-card">
+                    <span class="data-value counter" data-target="1" data-prefix="" data-suffix=" Hub">0 Hub</span>
+                    <h3>Rapid Deployment</h3>
+                    <p>Our remote hub architecture eliminates heavy on-site hardware, allowing for fast, modular stadium setup.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="reveal text-center" style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-family: 'Rajdhani'; font-size: 3rem; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">ONE CONTRACT. <span style="color: var(--theme-saffron);">ZERO HASSLES.</span></h2>
+            <p style="font-size: 1.1rem; color: #94a3b8; max-width: 600px; margin: 1rem auto; text-shadow: 0 5px 15px rgba(0,0,0,0.8);">OptiEye manages the complete VAR lifecycle for every match.</p>
+        </div>
+        <div class="pipeline-container reveal">
+            <div class="pipeline-step">
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <h3>Equipment Setup & Rigging</h3>
+                    <p>Our technical team handles the complete physical installation of up to 5 tactical cameras at the stadium before kick-off.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <h3>IT / Network Infrastructure</h3>
+                    <p>We establish the secure, low-latency data pipelines required to stream stadium feeds directly to our centralized remote VOR hubs.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <h3>Officiating & Operation</h3>
+                    <p>We deploy our own FIFA-accredited VAR teams and system operators to monitor the match in real-time.</p>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <h3>Post-Match Archiving</h3>
+                    <p>Comprehensive match logging and video archiving are delivered directly to the federation post-match.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auto-Active Script & Animations -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+            const menuItems = document.querySelectorAll('#nav-links a');
+            menuItems.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); 
+
+        const counters = document.querySelectorAll('.counter');
+        let hasCounted = false;
+
+        function animateCounters() {
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const suffix = counter.getAttribute('data-suffix') || "";
+                const prefix = counter.getAttribute('data-prefix') || "";
+                const isDecimal = target % 1 !== 0;
+                let current = 0;
+                const increment = target / 40; 
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.innerText = prefix + (isDecimal ? current.toFixed(1) : Math.ceil(current)) + suffix;
+                        setTimeout(updateCounter, 30);
+                    } else {
+                        counter.innerText = prefix + (isDecimal ? target.toFixed(1) : target) + suffix;
+                    }
+                };
+                updateCounter();
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            const featuresSection = document.getElementById('architecture');
+            if (featuresSection && !hasCounted) {
+                const position = featuresSection.getBoundingClientRect().top;
+                if (position < window.innerHeight - 100) {
+                    hasCounted = true;
+                    setTimeout(animateCounters, 300); 
+                }
+            }
+        });
+
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(2, 4, 10, 0.9)';
+                nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.5)';
+            } else {
+                nav.style.background = 'rgba(2, 4, 10, 0.7)';
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
