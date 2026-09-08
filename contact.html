@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact OptiEye | Global Command Center</title>
+<link rel="icon" type="image/png" href="optieye-logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;600;700&family=Rajdhani:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #02040a; 
+            --card-bg: #070c1a;
+            --text-main: #e2e8f0;
+            --theme-saffron: #ff9933;
+            --theme-white: #ffffff;
+            --theme-green: #138808;
+            
+            --saffron-glow: rgba(255, 153, 51, 0.5);
+            --green-glow: rgba(19, 136, 8, 0.5);
+            --white-glow: rgba(255, 255, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Jura', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .data-grid-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2; pointer-events: none;
+        }
+
+        .data-grid-bg::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 20%, var(--bg-base) 80%);
+        }
+
+        /* --- 3D HOLOGRAM: COMMUNICATIONS RADAR --- */
+        .comm-hologram-wrapper {
+            position: fixed; top: 50%; left: 50%; width: 100vw; height: 100vh;
+            transform: translate(-50%, -50%); perspective: 1200px; z-index: -3; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .radar-base {
+            width: 800px; height: 800px; border-radius: 50%; border: 2px dashed rgba(255, 255, 255, 0.15);
+            transform: rotateX(65deg) rotateZ(0deg); transform-style: preserve-3d; animation: spinRadar 40s linear infinite;
+        }
+        @keyframes spinRadar { 0% { transform: rotateX(65deg) rotateZ(0deg); } 100% { transform: rotateX(65deg) rotateZ(360deg); } }
+
+        .hq-node {
+            position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px;
+            background: var(--theme-white); border-radius: 50%; box-shadow: 0 0 40px var(--theme-white), 0 0 80px var(--theme-saffron);
+            transform: translateZ(50px); animation: pulseHQ 2s infinite alternate;
+        }
+        @keyframes pulseHQ { 0% { transform: translateZ(50px) scale(0.9); box-shadow: 0 0 30px var(--theme-white); } 100% { transform: translateZ(50px) scale(1.1); box-shadow: 0 0 60px var(--theme-white), 0 0 100px var(--theme-saffron); } }
+
+        .signal-ring {
+            position: absolute; top: 50%; left: 50%; border-radius: 50%; transform: translate(-50%, -50%);
+            border: 2px solid transparent; animation: emitSignal 4s linear infinite;
+        }
+        .signal-ring:nth-child(1) { animation-delay: 0s; border-color: var(--theme-green); }
+        .signal-ring:nth-child(2) { animation-delay: 1.3s; border-color: var(--theme-saffron); }
+        .signal-ring:nth-child(3) { animation-delay: 2.6s; border-color: var(--theme-white); }
+        @keyframes emitSignal { 0% { width: 60px; height: 60px; opacity: 1; border-width: 4px; } 100% { width: 800px; height: 800px; opacity: 0; border-width: 1px; } }
+
+        .comm-uplink {
+            position: absolute; top: 50%; left: 50%; width: 2px; height: 400px; background: linear-gradient(to top, var(--theme-white), transparent);
+            transform-origin: bottom center; transform: translate(-50%, -50%) rotateX(-90deg);
+        }
+
+        .hologram-watermark { position: fixed; bottom: 40px; right: 40px; display: flex; flex-direction: column; align-items: flex-end; z-index: -1; opacity: 0.25; pointer-events: none; }
+        .hologram-live-title { font-family: 'Rajdhani', sans-serif; font-size: 2.5rem; font-weight: 800; color: var(--theme-white); text-shadow: 0 0 15px var(--theme-white); letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase; }
+        .hologram-live-status { display: flex; align-items: center; gap: 8px; font-family: 'Jura', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--theme-saffron); letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,153,51,0.5); }
+        .live-dot { width: 12px; height: 12px; background: var(--theme-saffron); border-radius: 50%; box-shadow: 0 0 15px var(--theme-saffron); animation: pulseStatus 1s infinite alternate; }
+        @keyframes pulseStatus { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0.4; transform: scale(1.2); } }
+
+        /* --- NAVBAR --- */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 1rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(2, 4, 10, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 100; transition: all 0.4s ease;
+            white-space: nowrap; 
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+        .logo-img { height: 45px; width: auto; filter: drop-shadow(0 0 10px rgba(255,153,51,0.3)); }
+        .logo-text { font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none;}
+        .logo-text span { color: var(--theme-saffron); }
+
+        .nav-links { display: flex; align-items: center; gap: 1.8rem; flex-wrap: nowrap; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; font-size: 0.85rem; }
+        .nav-links a.active { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .nav-links a:hover { color: var(--theme-white); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        .btn-glow { background: transparent; color: var(--theme-white); border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1.5rem; font-family: 'Jura', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase; border-radius: 50px; letter-spacing: 1px; background: linear-gradient(90deg, rgba(255,153,51,0.1), rgba(19,136,8,0.1)); flex-shrink: 0; }
+        .btn-glow:hover { border-color: var(--theme-saffron); box-shadow: 0 0 20px var(--saffron-glow); background: rgba(255,153,51,0.1); }
+
+        /* --- HERO SECTION --- */
+        .hero { min-height: 60vh; padding-top: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-left: 2rem; padding-right: 2rem; position: relative; z-index: 10; }
+        .indigenous-badge { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.3); padding: 8px 24px; border-radius: 50px; color: var(--theme-white); font-weight: 700; background: rgba(255, 255, 255, 0.05); letter-spacing: 2px; font-size: 0.85rem; text-transform: uppercase; backdrop-filter: blur(5px); }
+        .hero h1 { font-family: 'Rajdhani', sans-serif; font-size: 5.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .gradient-text { background: linear-gradient(135deg, #ffffff 0%, var(--theme-white) 50%, var(--theme-saffron) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.4rem; color: #94a3b8; margin-bottom: 3rem; max-width: 700px; font-weight: 600; line-height: 1.6; text-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+
+        .section { padding: 4rem 2rem 8rem 2rem; max-width: 1200px; margin: 0 auto; position: relative; z-index: 10; }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* --- INTERACTIVE ROUTING CARDS --- */
+        .routing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 4rem; }
+        .route-card { background: rgba(7, 12, 26, 0.7); border: 1px solid rgba(255,255,255,0.1); padding: 2.5rem 2rem; border-radius: 12px; cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(10px); text-align: center; position: relative; overflow: hidden; }
+        .route-card h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.8rem; color: #fff; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s;}
+        .route-card p { color: #94a3b8; font-size: 1rem; line-height: 1.5; transition: color 0.3s;}
+        .route-card::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; transform: scaleX(0); transition: transform 0.4s ease; transform-origin: left; }
+
+        #route-business:hover, #route-business.active-route { border-color: var(--theme-green); background: rgba(19,136,8,0.05); transform: translateY(-8px); box-shadow: 0 15px 30px rgba(19, 136, 8, 0.15); }
+        #route-business::before { background: var(--theme-green); box-shadow: 0 0 15px var(--theme-green); }
+        #route-business:hover::before, #route-business.active-route::before { transform: scaleX(1); }
+        #route-business.active-route h3 { color: var(--theme-green); }
+
+        #route-investor:hover, #route-investor.active-route { border-color: var(--theme-saffron); background: rgba(255,153,51,0.05); transform: translateY(-8px); box-shadow: 0 15px 30px rgba(255, 153, 51, 0.15); }
+        #route-investor::before { background: var(--theme-saffron); box-shadow: 0 0 15px var(--theme-saffron); }
+        #route-investor:hover::before, #route-investor.active-route::before { transform: scaleX(1); }
+        #route-investor.active-route h3 { color: var(--theme-saffron); }
+
+        #route-general:hover, #route-general.active-route { border-color: var(--theme-white); background: rgba(255,255,255,0.05); transform: translateY(-8px); box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1); }
+        #route-general::before { background: var(--theme-white); box-shadow: 0 0 15px var(--theme-white); }
+        #route-general:hover::before, #route-general.active-route::before { transform: scaleX(1); }
+        #route-general.active-route h3 { color: var(--theme-white); }
+
+        /* --- DYNAMIC SECURE FORM --- */
+        .form-layout { display: grid; grid-template-columns: 1fr 350px; gap: 4rem; }
+        .secure-form-container { background: rgba(4, 8, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); padding: 3.5rem; border-radius: 16px; backdrop-filter: blur(15px); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; transition: border-color 0.5s ease, box-shadow 0.5s ease; }
+        
+        .form-state-business { border-color: rgba(19, 136, 8, 0.4); box-shadow: 0 0 40px rgba(19, 136, 8, 0.1); }
+        .form-state-investor { border-color: rgba(255, 153, 51, 0.4); box-shadow: 0 0 40px rgba(255, 153, 51, 0.1); }
+        .form-state-general { border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 0 40px rgba(255, 255, 255, 0.05); }
+
+        .form-header { font-family: 'Rajdhani', sans-serif; font-size: 2.2rem; color: #fff; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .dept-tag { font-size: 1rem; padding: 4px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 1px; transition: all 0.4s ease; }
+        .form-state-business .dept-tag { background: rgba(19, 136, 8, 0.1); color: var(--theme-green); border: 1px solid var(--theme-green); }
+        .form-state-investor .dept-tag { background: rgba(255, 153, 51, 0.1); color: var(--theme-saffron); border: 1px solid var(--theme-saffron); }
+        .form-state-general .dept-tag { background: rgba(255, 255, 255, 0.05); color: var(--theme-white); border: 1px solid var(--theme-white); }
+
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; color: #94a3b8; font-size: 0.95rem; margin-bottom: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input, .input-group textarea { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 1rem 1.2rem; border-radius: 8px; color: #fff; font-family: 'Jura', sans-serif; font-size: 1.05rem; transition: all 0.3s ease; outline: none; }
+        .input-group textarea { resize: vertical; min-height: 120px; }
+        
+        .form-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+        .form-state-business .input-group input:focus, .form-state-business .input-group textarea:focus { border-color: var(--theme-green); box-shadow: 0 0 15px rgba(19, 136, 8, 0.2); }
+        .form-state-investor .input-group input:focus, .form-state-investor .input-group textarea:focus { border-color: var(--theme-saffron); box-shadow: 0 0 15px rgba(255, 153, 51, 0.2); }
+        .form-state-general .input-group input:focus, .form-state-general .input-group textarea:focus { border-color: var(--theme-white); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
+
+        .btn-submit { width: 100%; padding: 1.2rem; margin-top: 1rem; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.4s ease; background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.2); }
+        .form-state-business .btn-submit { border-color: var(--theme-green); } .form-state-business .btn-submit:hover { background: var(--theme-green); box-shadow: 0 0 20px var(--theme-green); border-color: var(--theme-green);}
+        .form-state-investor .btn-submit { border-color: var(--theme-saffron); } .form-state-investor .btn-submit:hover { background: var(--theme-saffron); box-shadow: 0 0 20px var(--theme-saffron); border-color: var(--theme-saffron);}
+        .form-state-general .btn-submit { border-color: var(--theme-white); } .form-state-general .btn-submit:hover { background: var(--theme-white); color: var(--bg-base); box-shadow: 0 0 20px var(--theme-white); border-color: var(--theme-white);}
+
+        /* --- HQ INFO SIDEBAR --- */
+        .hq-sidebar { background: rgba(7, 12, 26, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 2.5rem; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: space-between; }
+        .hq-block { margin-bottom: 2.5rem; } .hq-block:last-child { margin-bottom: 0; }
+        .hq-block h4 { font-family: 'Rajdhani', sans-serif; font-size: 1.4rem; color: #fff; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;}
+        .hq-block p { color: #94a3b8; font-size: 1.05rem; line-height: 1.7; margin-bottom: 0.5rem;}
+        .hq-icon { display: inline-block; width: 24px; color: var(--theme-saffron); }
+
+        /* ========================================= */
+        /* --- RESPONSIVE DESIGN (TABLET & MOBILE) --- */
+        /* ========================================= */
+        @media (max-width: 1024px) {
+            .split-content { gap: 2rem; }
+            .grid-cards, .tech-grid, .routing-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+            .camera-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-layout { grid-template-columns: 1fr; gap: 2rem; }
+            .console-grid { grid-template-columns: 1fr; }
+            .telemetry-bar { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+
+        @media (max-width: 768px) {
+            nav { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .nav-links { width: 100%; overflow-x: auto; padding-bottom: 0.5rem; justify-content: flex-start; }
+            .btn-glow { margin-left: 0 !important; }
+            
+            .hero { padding-top: 180px !important; min-height: 50vh; height: auto; }
+            .hero h1 { font-size: 3rem !important; }
+            .hero-subtitle { font-size: 1.1rem !important; }
+            
+            .section, .console-section { padding: 3rem 1.5rem !important; }
+            .split-content { grid-template-columns: 1fr !important; }
+            .camera-grid { grid-template-columns: 1fr !important; }
+            .telemetry-bar { grid-template-columns: 1fr !important; }
+            .pipeline-step { flex-direction: column; text-align: center; }
+            .step-number { margin-right: 0; margin-bottom: 1rem; }
+            
+            .timeline-item, .timeline-item:nth-child(odd) { flex-direction: column; align-items: flex-start; padding-left: 50px; }
+            .timeline-content { width: 100%; }
+            .timeline-container::before { left: 20px; }
+            .timeline-node { left: 20px; }
+            .timeline-item > div:last-child { display: none; }
+            
+            .routing-grid { grid-template-columns: 1fr; }
+            .secure-form-container { padding: 1.5rem; }
+            .form-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .form-two-col { grid-template-columns: 1fr !important; }
+            
+            .comm-hologram-wrapper, .var-network-wrapper, .var-hologram-wrapper, .investor-hologram-wrapper { transform: translate(-50%, -50%) scale(0.4); }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.2rem !important; }
+            .console-title h1 { font-size: 2rem !important; }
+            .data-value { font-size: 2.2rem !important; }
+            .route-card { padding: 1.5rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="data-grid-bg"></div>
+
+    <div class="comm-hologram-wrapper">
+        <div class="radar-base">
+            <div class="signal-ring"></div><div class="signal-ring"></div><div class="signal-ring"></div>
+        </div>
+        <div class="hq-node"></div>
+        <div class="comm-uplink"></div>
+        <div class="hologram-watermark">
+            <div class="hologram-live-title">COMMAND CENTER</div>
+            <div class="hologram-live-status"><span style="color: var(--theme-white);">AWAITING TRANSMISSION</span><div class="live-dot"></div></div>
+        </div>
+    </div>
+
+    <!-- Global Navigation -->
+    <nav id="navbar">
+        <a href="index.html" class="logo-container">
+            <img src="optieye-logo.png" alt="OptiEye Shield Logo" class="logo-img">
+            <div class="logo-text">OPTIEYE <span>VAR LITE</span></div>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="how-we-work.html">How We Work</a>
+            <a href="investor.html">Investor Portal</a>
+            <a href="contact.html">Contact</a>
+            <button class="btn-glow" style="margin-left: 2rem;" onclick="location.href='demo.html'">Interactive Demo</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="indigenous-badge"><div style="width: 8px; height: 8px; background: var(--theme-white); border-radius: 50%; box-shadow: 0 0 10px var(--theme-white); animation: pulseStatus 1s infinite alternate;"></div>Global Communications</div>
+        <h1><span class="gradient-text">Initiate Transmission.</span></h1>
+        <p class="hero-subtitle">Select your secure routing channel below to connect directly with the OptiEye executive team.</p>
+    </section>
+
+    <section id="connect" class="section reveal">
+        <div class="routing-grid">
+            <div class="route-card active-route" id="route-business" onclick="setRoute('business')">
+                <h3>League Integration</h3>
+                <p>For federations and league organizers inquiring about VARaaS deployment.</p>
+            </div>
+            <div class="route-card" id="route-investor" onclick="setRoute('investor')">
+                <h3>Investor Relations</h3>
+                <p>For venture capital, strategic partners, and institutional investors.</p>
+            </div>
+            <div class="route-card" id="route-general" onclick="setRoute('general')">
+                <h3>General Inquiry</h3>
+                <p>For media, technical questions, and all other correspondence.</p>
+            </div>
+        </div>
+
+        <div class="form-layout">
+            <div class="secure-form-container form-state-business" id="secure-form">
+                <div class="form-header"><span>Secure Uplink</span><span class="dept-tag" id="form-dept-tag">ROUTING: LEAGUE OPS</span></div>
+                <form action="mailto:info@optieyevar.online" method="post" enctype="text/plain">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" name="Name" required placeholder="Enter your full name">
+                    </div>
+                    <div class="input-group">
+                        <label id="dynamic-org-label">League / Federation Name</label>
+                        <input type="text" id="dynamic-org-input" name="Organization" required placeholder="e.g. Regional Football Association">
+                    </div>
+                    <div class="form-two-col">
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" name="Email" required placeholder="name@organization.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Phone (Optional)</label>
+                            <input type="tel" name="Phone" placeholder="+91 00000 00000">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Transmission Payload (Message)</label>
+                        <textarea required name="Message" placeholder="Detail your operational requirements, league structure, or investment interest here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit" id="submit-btn">Transmit Data</button>
+                </form>
+            </div>
+
+            <div class="hq-sidebar">
+                <div>
+                    <div class="hq-block">
+                        <h4><span class="hq-icon">📍</span> Global HQ</h4>
+                        <p style="font-weight: 600; color: #fff;">OptiEye Systems</p>
+                        <p>Rajarhat, New Town</p>
+                        <p>Kolkata, West Bengal</p>
+                        <p>India</p>
+                    </div>
+                    <div class="hq-block">
+                        <h4><span class="hq-icon">✉️</span> Direct Comms</h4>
+                        <p>info@optieyevar.online</p>
+                    </div>
+                </div>
+                <div class="hq-block" style="margin-bottom: 0;">
+                    <h4 style="border:none; color: var(--theme-saffron); font-size: 1.2rem;">SYSTEM INTEGRITY</h4>
+                    <p style="font-size: 0.9rem;">All transmissions submitted through this portal are end-to-end encrypted and routed directly to the OptiEye Executive Board.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auto-Active Script & Routing -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+            const menuItems = document.querySelectorAll('#nav-links a');
+            menuItems.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); 
+
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(2, 4, 10, 0.9)';
+                nav.style.boxShadow = '0 4px 30px rgba(0,0,0,0.5)';
+            } else {
+                nav.style.background = 'rgba(2, 4, 10, 0.7)';
+                nav.style.boxShadow = 'none';
+            }
+        });
+
+        function setRoute(dept) {
+            document.getElementById('route-business').classList.remove('active-route');
+            document.getElementById('route-investor').classList.remove('active-route');
+            document.getElementById('route-general').classList.remove('active-route');
+            document.getElementById('route-' + dept).classList.add('active-route');
+
+            const formContainer = document.getElementById('secure-form');
+            formContainer.className = 'secure-form-container form-state-' + dept;
+
+            const tag = document.getElementById('form-dept-tag');
+            const orgLabel = document.getElementById('dynamic-org-label');
+            const orgInput = document.getElementById('dynamic-org-input');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (dept === 'business') {
+                tag.innerText = 'ROUTING: LEAGUE OPS'; orgLabel.innerText = 'League / Federation Name'; orgInput.placeholder = 'e.g. Regional Football Association'; submitBtn.innerText = 'Transmit Protocol';
+            } else if (dept === 'investor') {
+                tag.innerText = 'ROUTING: VENTURE / PE'; orgLabel.innerText = 'Venture Firm / Organization'; orgInput.placeholder = 'e.g. Apex Capital Partners'; submitBtn.innerText = 'Request Financials';
+            } else {
+                tag.innerText = 'ROUTING: GENERAL HQ'; orgLabel.innerText = 'Organization / Media Outlet'; orgInput.placeholder = 'Optional'; orgInput.required = false; submitBtn.innerText = 'Send Message';
+            }
+        }
+    </script>
+</body>
+</html>
